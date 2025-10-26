@@ -30,7 +30,7 @@ def add_task():
     # Add to main dataframe
     to_do_list = pd.concat([to_do_list, new_task], ignore_index=True)
 
-    print(f"\n✅ '{to_bring}' agregado correctamente.\n")
+    print(f"\n✅ '{to_bring}' added correctly.\n")
 
 add_task()
 
