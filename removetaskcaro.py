@@ -25,6 +25,6 @@ def remove_task():
     else:
         print(f"\n Task '{task_name}' not found in your list.\n")
 
-    print("📋 Updated list:")
+    print(" Updated list:")
     print(to_do_list)
  
