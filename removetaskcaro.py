@@ -1,30 +1,18 @@
-import pandas as pd
+def remove_task(df):
+    if df is None or df.empty:
+        print("⚠️ Your list is empty. Nothing to remove.\n")
+        return df
 
-# we assume the same global DataFrame from your add_task file
-to_do_list = pd.DataFrame(columns=['to_bring', 'priority', 'use', 'deadline'])
+    print("\nCurrent tasks:")
+    print(df[['to_bring', 'priority', 'use', 'deadline']].to_string(index=False))
 
-def remove_task():
-    global to_do_list  
-
-    if to_do_list.empty:
-        print(" Your camping list is empty, nothing to remove.\n")
-        return
-
-    print("\n📋 Current tasks:")
-    print(to_do_list[['to_bring', 'priority', 'use', 'deadline']])
-
-    # Ask which task to remove
-    task_name = input("\nEnter the name of the task to remove: ")
-
-    # Look for the task (case-insensitive)
-    mask = to_do_list['to_bring'].str.lower() == task_name.lower()
+    name = input("\nEnter the name of the task to remove: ")
+    mask = df['to_bring'].str.lower() == name.lower()
 
     if mask.any():
-        to_do_list = to_do_list[~mask]
-        print(f"\n Task '{task_name}' was removed successfully.\n")
+        updated = df[~mask].reset_index(drop=True)
+        print(f"\n✅ Task '{name}' removed successfully!\n")
+        return updated
     else:
-        print(f"\n Task '{task_name}' not found in your list.\n")
-
-    print(" Updated list:")
-    print(to_do_list)
- 
+        print(f"\n⚠️ Task '{name}' not found.\n")
+        return df
