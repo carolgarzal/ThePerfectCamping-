@@ -1,29 +1,13 @@
-import pandas as pd
-
-PRIORITY_ORDER = pd.CategoricalDtype(categories=['high', 'medium', 'low'], ordered=True)
-
-def view_tasks(df: pd.DataFrame) -> None:
-    """
-    Muestra las tareas ordenadas por prioridad (high→medium→low)
-    y luego por fecha (la más próxima primero). Si no hay tareas, lo dice.
-    """
-    if df.empty:
-        print("📭 Your camping list is empty.\n")
+def view_tasks(df):
+    if df is None or df.empty:
+        print("⚠️ Your list is empty.\n")
         return
 
-    tmp = df.copy()
-    tmp['priority'] = tmp['priority'].astype(PRIORITY_ORDER)
-    tmp['deadline'] = pd.to_datetime(tmp['deadline'], errors='coerce')
+    prio_order = {'high': 0, 'medium': 1, 'low': 2}
+    df_sorted = df.copy()
+    df_sorted['__prio'] = df_sorted['priority'].map(prio_order).fillna(9)
+    df_sorted = df_sorted.sort_values(by=['__prio', 'deadline']).drop(columns='__prio')
 
-    tmp = tmp.sort_values(
-        by=['priority', 'deadline'],
-        ascending=[True, True],
-        na_position='last'  # sin fecha al final
-    )
-
-    print("\n📝 Camping To-Do List (sorted by priority, then deadline):")
-    for _, row in tmp.iterrows():
-        dl = row['deadline']
-        dl_str = dl.date().isoformat() if pd.notna(dl) else "—"
-        print(f"• {row['to_bring']} | {row['priority']} | {row['use']} | {dl_str}")
+    print("\n📋 Camping Tasks:")
+    print(df_sorted[['to_bring', 'priority', 'use', 'deadline']].to_string(index=False))
     print()
