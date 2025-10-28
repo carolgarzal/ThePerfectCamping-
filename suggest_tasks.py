@@ -1,26 +1,24 @@
-import pandas as pd
 from datetime import date
 
-def suggest_tasks(df: pd.DataFrame, top_n: int = 3) -> pd.DataFrame:
-    # Convertir prioridad en puntos numéricos
-    priority_map = {'high': 3, 'medium': 2, 'low': 1}
-    df['prio_points'] = df['priority'].map(priority_map)
+def suggest_tasks(df):
+    if df is None or df.empty:
+        print("⚠️ No tasks to suggest.\n")
+        return
 
-    # Calcular urgencia según deadline
-    today = pd.Timestamp.today().date()
-    df['urgency_points'] = df['deadline'].apply(
-        lambda d: 3 if pd.notna(d) and (d - today).days <= 2 else
-                  2 if pd.notna(d) and (d - today).days <= 5 else
-                  1 if pd.notna(d) else 0
+    today = date.today()
+    prio_points = {'high': 3, 'medium': 2, 'low': 1}
+
+    temp = df.copy()
+    temp['prio_pts'] = temp['priority'].map(prio_points).fillna(0)
+    temp['days_left'] = (temp['deadline'] - today).dt.days
+    temp['urgency_pts'] = temp['days_left'].apply(
+        lambda d: 3 if d <= 2 else (2 if d <= 5 else 1)
     )
 
-    # Calcular puntuación combinada
-    df['score'] = (df['prio_points'] * 0.7) + (df['urgency_points'] * 0.3)
+    temp['score'] = (temp['prio_pts'] * 0.7) + (temp['urgency_pts'] * 0.3)
+    top = temp.sort_values('score', ascending=False).head(3)
 
-    # Ordenar y mostrar top N
-    sorted_df = df.sort_values(by='score', ascending=False).head(top_n)
-    print("🤖 Suggested Tasks (by priority & deadline):")
-    for _, row in sorted_df.iterrows():
-        print(f"• {row['to_bring']} | {row['priority']} | {row['use']} | {row['deadline']} | score={row['score']:.2f}")
-
-    return sorted_df
+    print("\n🤖 Suggested Tasks:")
+    for _, r in top.iterrows():
+        print(f"- {r['to_bring']} | {r['priority']} | {r['use']} | {r['deadline']} | score: {round(r['score'],2)}")
+    print()
